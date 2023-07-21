@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 
 public class InstantiateByAddComponent : MonoBehaviour
 {
+    string url = "https://test01-1253238815.cos.ap-guangzhou.myqcloud.com/HotUpdate/";
     /// <summary>
     /// 加载prefab和场景
     /// </summary>
@@ -22,11 +23,10 @@ public class InstantiateByAddComponent : MonoBehaviour
     /// </summary>
     void Run_InstantiateComponentByAssetBundle()
     {
-        StartCoroutine(StartLoadAssemblyAsset(Application.streamingAssetsPath + "/" + "prefabs", "prefab"));
-        StartCoroutine(StartLoadAssemblyAsset(Application.streamingAssetsPath + "/" + "scenes", "scene"));
+        StartCoroutine(StartLoadAssemblyAsset(url + "scenes"));
     }
 
-    IEnumerator StartLoadAssemblyAsset(string filePath, string type)
+    IEnumerator StartLoadAssemblyAsset(string filePath)
     {
         UnityWebRequest unityWebRequest = UnityWebRequestAssetBundle.GetAssetBundle(filePath);
 
@@ -37,22 +37,11 @@ public class InstantiateByAddComponent : MonoBehaviour
             if (unityWebRequest.result == UnityWebRequest.Result.Success)
             {
                 AssetBundle ab = DownloadHandlerAssetBundle.GetContent(unityWebRequest);//获取ab包
-                switch (type)
-                {
-                    case "prefab":
-                        GameObject obj = ab.LoadAsset<GameObject>("Cube");//加载Asset
-                        GameObject.Instantiate(obj);//实例化 
-                        break;
 
-                    case "scene":
-                        if (ab != null)
-                            SceneManager.LoadScene("SampleSelector", LoadSceneMode.Single);
-                        SceneManager.sceneLoaded += CallBack;
-                        break;
+                if (ab != null)
+                    SceneManager.LoadScene("SampleSelector", LoadSceneMode.Single);
+                SceneManager.sceneLoaded += CallBack;
 
-                    default:
-                        break;
-                }
             }
             else
             {
@@ -64,6 +53,6 @@ public class InstantiateByAddComponent : MonoBehaviour
 
     void CallBack(Scene scene, LoadSceneMode sceneType)
     {
-        Debug.Log(scene.name + "is load complete!，55555555555555555！");
+        Debug.Log(scene.name + "is load complete!，热更新场景加载成功！");
     }
 }

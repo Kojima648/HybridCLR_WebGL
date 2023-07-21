@@ -7,92 +7,116 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.Networking;
-using UnityEngine.SceneManagement;
+
 public class LoadDll : MonoBehaviour
 {
+
     void Start()
     {
-        StartGame();
+        StartCoroutine(DownLoadAssets(this.StartGame));
     }
 
-    void StartGame()
+    #region download assets
+
+    private static Dictionary<string, byte[]> s_assetDatas = new Dictionary<string, byte[]>();
+
+    public static byte[] ReadBytesFromStreamingAssets(string dllName)
     {
-        LoadMetadataForAOTAssemblies();
-        LoadHotFixDll();
+        return s_assetDatas[dllName];
     }
+
+    private string GetWebRequestPath(string asset)
+    {
+        string url = "https://test01-1253238815.cos.ap-guangzhou.myqcloud.com/HotUpdate";
+        var path = $"{url}/{asset}";
+        if (!path.Contains("://"))
+        {
+            path = "file://" + path;
+        }
+        return path;
+    }
+    private static List<string> AOTMetaAssemblyFiles { get; } = new List<string>()
+    {
+        "mscorlib.dll.bytes",
+        "System.dll.bytes",
+        "System.Core.dll.bytes",
+    };
+
+    IEnumerator DownLoadAssets(Action onDownloadComplete)
+    {
+        var assets = new List<string>
+        {
+             "prefabs",
+            "HotUpdate.dll.bytes",
+        }.Concat(AOTMetaAssemblyFiles);
+
+        foreach (var asset in assets)
+        {
+            string dllPath = GetWebRequestPath(asset);
+            Debug.Log($"start download asset:{dllPath}");
+            UnityWebRequest www = UnityWebRequest.Get(dllPath);
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.Log(www.error);
+            }
+
+            else
+            {
+                // Or retrieve results as binary data
+                byte[] assetData = www.downloadHandler.data;
+                Debug.Log($"dll:{asset}  size:{assetData.Length}");
+                s_assetDatas[asset] = assetData;
+            }
+        }
+
+        onDownloadComplete();
+    }
+
+    #endregion
+
+    private static Assembly _hotUpdateAss;
 
     /// <summary>
     /// 为aot assembly加载原始metadata， 这个代码放aot或者热更新都行。
     /// 一旦加载后，如果AOT泛型函数对应native实现不存在，则自动替换为解释模式执行
     /// </summary>
-    private void LoadMetadataForAOTAssemblies()
+    private static void LoadMetadataForAOTAssemblies()
     {
-        List<string> aotMetaAssemblyFiles = new List<string>()
-        {
-            "mscorlib.dll",
-            "System.dll",
-            "System.Core.dll",
-        };
         /// 注意，补充元数据是给AOT dll补充元数据，而不是给热更新dll补充元数据。
         /// 热更新dll不缺元数据，不需要补充，如果调用LoadMetadataForAOTAssembly会返回错误
         /// 
-
-        for (int i = 0; i < aotMetaAssemblyFiles.Count; i++)
+        HomologousImageMode mode = HomologousImageMode.SuperSet;
+        foreach (var aotDllName in AOTMetaAssemblyFiles)
         {
-            if (i < aotMetaAssemblyFiles.Count)
-            {
-                StartCoroutine(LoadAssembly(Application.streamingAssetsPath + "/" + aotMetaAssemblyFiles[i] + ".bytes", "aot"));
-            }
+            byte[] dllBytes = ReadBytesFromStreamingAssets(aotDllName);
+            // 加载assembly对应的dll，会自动为它hook。一旦aot泛型函数的native函数不存在，用解释器版本代码
+            LoadImageErrorCode err = RuntimeApi.LoadMetadataForAOTAssembly(dllBytes, mode);
+            Debug.Log($"LoadMetadataForAOTAssembly:{aotDllName}. mode:{mode} ret:{err}");
         }
     }
 
-    /// <summary>
-    /// 加载热更dll
-    /// </summary>
-    private void LoadHotFixDll()
+    void StartGame()
     {
-        string filePath = Application.streamingAssetsPath + "/" + "HotUpdate.dll.bytes";
-        StartCoroutine(LoadAssembly(filePath, "dll"));
+        LoadMetadataForAOTAssemblies();
+#if !UNITY_EDITOR
+        _hotUpdateAss = Assembly.Load(ReadBytesFromStreamingAssets("HotUpdate.dll.bytes"));
+#else
+        _hotUpdateAss = System.AppDomain.CurrentDomain.GetAssemblies().First(a => a.GetName().Name == "HotUpdate");
+#endif
+        Type entryType = _hotUpdateAss.GetType("Entry");
+        entryType.GetMethod("Start").Invoke(null, null);
+
+        Run_InstantiateComponentByAsset();
     }
 
-
-    IEnumerator LoadAssembly(string filePath, string type)
+    private static void Run_InstantiateComponentByAsset()
     {
-        UnityWebRequest unityWebRequest;
-        unityWebRequest = UnityWebRequest.Get(filePath);
-
-        yield return unityWebRequest.SendWebRequest();
-        if (unityWebRequest.isDone)
-        {
-            if (unityWebRequest.result == UnityWebRequest.Result.Success)
-            {
-                switch (type)
-                {
-                    case "dll":
-                        Assembly asm = Assembly.Load(unityWebRequest.downloadHandler.data);
-                        Type entryType = asm.GetType("Entry");
-                        entryType.GetMethod("Start").Invoke(null, null);
-                        break;
-
-                    case "aot":
-                        HomologousImageMode mode = HomologousImageMode.SuperSet;
-                        byte[] dllBytes = unityWebRequest.downloadHandler.data;
-                        // 加载assembly对应的dll，会自动为它hook。一旦aot泛型函数的native函数不存在，用解释器版本代码
-                        LoadImageErrorCode err = RuntimeApi.LoadMetadataForAOTAssembly(dllBytes, mode);
-                        Debug.Log($"LoadMetadataForAOTAssembly:{filePath.Substring(filePath.LastIndexOf("/"))}. mode:{mode} ret:{err}");
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-            else
-            {
-                Debug.LogFormat($"filePath:{filePath} load error:{unityWebRequest.error}");
-            }
-        }
-        unityWebRequest.Dispose();
+        // 通过实例化assetbundle中的资源，还原资源上的热更新脚本
+        AssetBundle ab = AssetBundle.LoadFromMemory(LoadDll.ReadBytesFromStreamingAssets("prefabs"));
+        GameObject cube = ab.LoadAsset<GameObject>("Cube");
+        GameObject.Instantiate(cube);
     }
 }

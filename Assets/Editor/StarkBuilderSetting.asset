@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1315287583, guid: 7e23a523ae65c45ec85f05463979c29a, type: 3}
+  m_Name: StarkBuilderSetting
+  m_EditorClassIdentifier: 
+  isDevBuild: 0
+  stripEngineCode: 0
+  appId: tt53b42509cc883d3507
+  isWebGL2: 0
+  needCompress: 1
+  wasmResourceUrl: http://
+  webglPackagePath: E:\Workspace\Unity3D\hybridclr_trial\Build\webgl\webgl_package-20230721_162045.zip
+  useByteAudioAPI: 0
+  useNewFileSystem: 0
+  wasmMemorySize: 512
+  urlCacheList: []
+  dontCacheFileNames: []
+  apkFileNameBase: 
+  appHost: 2
+  compressMethod: 1
+  runtimeEnv: 0
+  framework: 1
+  architecture: 2
+  miniApkVersion: 0
+  scriptingBackend: 0
+  NativeWhiteListRegex:
+  - com.bytedance.starksdk
+  - _Backup~
