@@ -47,7 +47,7 @@ public class LoadDll : MonoBehaviour
     {
         var assets = new List<string>
         {
-             "prefabs",
+            "prefabs",
             "HotUpdate.dll.bytes",
         }.Concat(AOTMetaAssemblyFiles);
 

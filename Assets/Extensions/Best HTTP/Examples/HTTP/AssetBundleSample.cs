@@ -88,8 +88,7 @@ namespace BestHTTP.Examples.HTTP
             request.SetHeader("Access-Control-Allow-Headers", "Accept, X-Access-Token, X-Application-Name, X-Request-Sent-Time, Content-Type");
             request.SetHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
             request.SetHeader("Access-Control-Allow-Origin", "*");
-
-
+            request.IsCookiesEnabled = false;
 
             this._statusText.text = "Download started";
 

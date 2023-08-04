@@ -38,10 +38,9 @@ public class InstantiateByAddComponent : MonoBehaviour
             {
                 AssetBundle ab = DownloadHandlerAssetBundle.GetContent(unityWebRequest);//获取ab包
 
-                if (ab != null)
-                    SceneManager.LoadScene("SampleSelector", LoadSceneMode.Single);
-                SceneManager.sceneLoaded += CallBack;
-
+                //if (ab != null)
+                //    SceneManager.LoadScene("SampleSelector", LoadSceneMode.Single);
+                //SceneManager.sceneLoaded += CallBack;
             }
             else
             {

@@ -118,7 +118,7 @@ namespace BestHTTP.Examples.SocketIO3
         {
             base.Start();
 
-            this._userNameInput.text = PlayerPrefs.GetString("SocketIO3ChatSample_UserName");
+            this._userNameInput.text = UnityEngine.PlayerPrefs.GetString("SocketIO3ChatSample_UserName");
             SetButtons(!string.IsNullOrEmpty(this._userNameInput.text), false);
             SetPanels(true);
         }
@@ -169,7 +169,7 @@ namespace BestHTTP.Examples.SocketIO3
         {
             SetPanels(false);
 
-            PlayerPrefs.SetString("SocketIO3ChatSample_UserName", this._userNameInput.text);
+            UnityEngine.PlayerPrefs.SetString("SocketIO3ChatSample_UserName", this._userNameInput.text);
 
             AddText("Connecting...");
 

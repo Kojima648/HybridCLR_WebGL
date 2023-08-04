@@ -189,13 +189,16 @@ var Lib_BEST_HTTP_WebGL_HTTP_Bridge =
 			console.log(request + ' XHR_GetResponseHeaders');
 
         var headers = ''
-        var cookies = document.cookie.split(';');
-        for(var i = 0; i < cookies.length; ++i) {
+		if(document.cookie){
+			var cookies = document.cookie.split(';');
+        	for(var i = 0; i < cookies.length; ++i) {
             const cookie = cookies[i].trim();
 
             if (cookie.length > 0)
                 headers += "Set-Cookie:" + cookie + "\r\n";
-        }
+        	}
+		}
+        
 
         var additionalHeaders = _best_http_request_bridge_global.requestInstances[request].getAllResponseHeaders().trim();
         if (additionalHeaders.length > 0) {

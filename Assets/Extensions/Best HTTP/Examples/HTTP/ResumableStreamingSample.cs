@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using UnityEngine;
 using UnityEngine.UI;
 using BestHTTP;
@@ -15,12 +14,12 @@ namespace BestHTTP.Examples.HTTP
         /// <summary>
         /// Expected content length
         /// </summary>
-        protected override long DownloadLength { get { return PlayerPrefs.GetInt(this._downloadPath + DownloadLengthKey); } set { PlayerPrefs.SetInt(this._downloadPath + DownloadLengthKey, (int)value); } }
+        protected override long DownloadLength { get { return UnityEngine.PlayerPrefs.GetInt(this._downloadPath + DownloadLengthKey); } set { UnityEngine.PlayerPrefs.SetInt(this._downloadPath + DownloadLengthKey, (int)value); } }
 
         /// <summary>
         /// Total processed bytes
         /// </summary>
-        protected override long ProcessedBytes { get { return PlayerPrefs.GetInt(this._downloadPath + ProcessedBytesKey, 0); } set { PlayerPrefs.SetInt(this._downloadPath + ProcessedBytesKey, (int)value); } }
+        protected override long ProcessedBytes { get { return UnityEngine.PlayerPrefs.GetInt(this._downloadPath + ProcessedBytesKey, 0); } set { UnityEngine.PlayerPrefs.SetInt(this._downloadPath + ProcessedBytesKey, (int)value); } }
 
         private long downloadStartedAt = 0;
 
@@ -88,9 +87,9 @@ namespace BestHTTP.Examples.HTTP
 
         private void DeleteKeys()
         {
-            PlayerPrefs.DeleteKey(this._downloadPath + ProcessedBytesKey);
-            PlayerPrefs.DeleteKey(this._downloadPath + DownloadLengthKey);
-            PlayerPrefs.Save();
+            UnityEngine.PlayerPrefs.DeleteKey(this._downloadPath + ProcessedBytesKey);
+            UnityEngine.PlayerPrefs.DeleteKey(this._downloadPath + DownloadLengthKey);
+            UnityEngine.PlayerPrefs.Save();
         }
     }
 }

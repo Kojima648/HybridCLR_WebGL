@@ -42,7 +42,7 @@ namespace BestHTTP.Examples
 
             this._pluginVersion.text = "Version: " + HTTPManager.UserAgent;
 
-            int logLevel = PlayerPrefs.GetInt("BestHTTP.HTTPManager.Logger.Level", (int)HTTPManager.Logger.Level);
+            int logLevel = UnityEngine.PlayerPrefs.GetInt("BestHTTP.HTTPManager.Logger.Level", (int)HTTPManager.Logger.Level);
             this._logLevelDropdown.value = logLevel;
             HTTPManager.Logger.Level = (BestHTTP.Logger.Loglevels)logLevel;
 
@@ -50,7 +50,7 @@ namespace BestHTTP.Examples
             this._proxyLabel.gameObject.SetActive(false);
             this._proxyInputField.gameObject.SetActive(false);
 #else
-            string proxyURL = PlayerPrefs.GetString("BestHTTP.HTTPManager.Proxy", null);
+            string proxyURL = UnityEngine.PlayerPrefs.GetString("BestHTTP.HTTPManager.Proxy", null);
             if (!string.IsNullOrEmpty(proxyURL))
             {
                 try
@@ -80,7 +80,7 @@ namespace BestHTTP.Examples
         public void OnLogLevelChanged(int idx)
         {
             HTTPManager.Logger.Level = (BestHTTP.Logger.Loglevels)idx;
-            PlayerPrefs.SetInt("BestHTTP.HTTPManager.Logger.Level", idx);
+            UnityEngine.PlayerPrefs.SetInt("BestHTTP.HTTPManager.Logger.Level", idx);
         }
 
         public void OnProxyEditEnd(string proxyURL)
@@ -93,7 +93,7 @@ namespace BestHTTP.Examples
                 else
                     HTTPManager.Proxy = new HTTPProxy(new Uri(this._proxyInputField.text), null, true);
 
-                PlayerPrefs.SetString("BestHTTP.HTTPManager.Proxy", this._proxyInputField.text);
+                UnityEngine.PlayerPrefs.SetString("BestHTTP.HTTPManager.Proxy", this._proxyInputField.text);
             }
             catch
             { }
